@@ -1,11 +1,5 @@
-# Oracle Private Agent Factory - Leasing Industry
-# Agent Configuration - Open Agent Specification Format
-
 agents:
 
-  # -----------------------------------------
-  # AGENT 1: Lease Contract Intelligence
-  # -----------------------------------------
   - id: lease-contract-agent
     name: "Lease Contract Intelligence Agent"
     description: >
@@ -32,23 +26,16 @@ agents:
         embedding_model: cohere.embed-multilingual-v3
     system_prompt: |
       You are an expert Lease Contract Assistant for a leasing company in Indonesia.
-      You help operations staff quickly find answers about:
-      - Lease contract terms, dates, and payment schedules
-      - Early termination fees and conditions
-      - Renewal options and eligibility
-      - Asset details and residual values
-      Always respond in professional Bahasa Indonesia or English based on the user language.
-      Base all answers strictly on contract data and company policy documents.
-      When referencing a contract, always include the Contract ID.
+      Help operations staff find answers about lease contract terms, dates,
+      payment schedules, early termination fees, renewal options, asset details,
+      and residual values. Respond in Bahasa Indonesia or English based on the
+      user language. Always reference the Contract ID when answering.
     sample_questions:
       - "Berapa denda early termination untuk kontrak LC-2024-002?"
       - "Kontrak mana yang memiliki opsi renewal aktif?"
       - "Apa kebijakan perusahaan untuk perpanjangan kontrak?"
       - "What is the residual value for PT Tambang Sejahtera contract?"
 
-  # -----------------------------------------
-  # AGENT 2: Credit & Risk Analysis
-  # -----------------------------------------
   - id: credit-risk-agent
     name: "Credit & Risk Analysis Agent"
     description: >
@@ -79,29 +66,22 @@ agents:
       - type: pdf_report_generator
     system_prompt: |
       You are a Credit Risk Analyst AI for a leasing company in Indonesia.
-      Your role is to:
-      - Summarize credit risk exposure across the portfolio
-      - Flag CRITICAL and HIGH risk customers for immediate review
-      - Analyze trends in credit scores, DTI ratios, and payment history
-      - Generate visual charts and risk reports on demand
-      Always highlight accounts requiring urgent attention.
+      Summarize credit risk exposure, flag CRITICAL and HIGH risk customers,
+      analyze credit scores, DTI ratios, and payment history trends.
       Format all financial figures in Indonesian Rupiah (IDR).
-      Be precise with numbers and always show the risk rating prominently.
+      Always highlight accounts requiring urgent attention.
     sample_questions:
       - "Tampilkan semua customer dengan risk rating CRITICAL atau HIGH"
-      - "Berapa total exposure untuk customer dengan credit score di bawah 600?"
+      - "Berapa total exposure untuk customer credit score di bawah 600?"
       - "Buat chart distribusi risk rating seluruh portfolio"
       - "Which customers are due for credit review this month?"
 
-  # -----------------------------------------
-  # AGENT 3: Collections Automation
-  # -----------------------------------------
   - id: collections-agent
     name: "Collections Automation Agent"
     description: >
       Monitors overdue accounts, recommends collection actions per
-      company policy, drafts WhatsApp and email communication
-      templates, and tracks escalation stages for the collections team.
+      company policy, drafts WhatsApp and email templates,
+      and tracks escalation stages for the collections team.
     type: workflow_automation
     llm:
       provider: oci_genai
@@ -126,24 +106,18 @@ agents:
       - type: escalation_recommender
     system_prompt: |
       You are a Collections Automation Agent for a leasing company in Indonesia.
-      Your responsibilities:
-      - Monitor accounts by Days Past Due (DPD) and overdue amount
-      - Recommend next collection actions per company escalation policy
-      - Draft professional, firm but respectful communications in Bahasa Indonesia
-      - Prioritize high-value overdue accounts above IDR 50,000,000
-      - Never recommend legal escalation without confirming 60 or more DPD
-      Follow the 4-stage escalation policy strictly:
+      Monitor accounts by Days Past Due and overdue amount. Recommend next
+      collection actions per company escalation policy. Draft professional
+      communications in Bahasa Indonesia. Prioritize overdue accounts above
+      IDR 50,000,000. Never recommend legal escalation without confirming
+      60 or more DPD. Follow the 4-stage policy strictly:
       Stage 1 Reminder, Stage 2 Soft Collection, Stage 3 Legal, Stage 4 Write-Off.
-      Format all communications professionally with company letterhead standard.
     sample_questions:
       - "Tampilkan semua akun yang overdue lebih dari 30 hari"
       - "Buatkan draft WhatsApp reminder untuk COL-001"
       - "Rekomendasikan tindakan untuk akun dengan DPD tertinggi"
       - "Berapa total piutang tertunggak seluruh portfolio collections?"
 
-# -----------------------------------------
-# SHARED DATABASE CONNECTION
-# -----------------------------------------
 connections:
   - id: LEASING_DB
     type: oracle_autonomous_database
@@ -152,9 +126,6 @@ connections:
     username: LEASING_AGENT_USER
     password_secret: oci_vault_secret_id_here
 
-# -----------------------------------------
-# GUARDRAILS
-# -----------------------------------------
 guardrails:
   - block_pii_output: true
   - max_sql_rows_returned: 500
