@@ -9,7 +9,7 @@ agents:
     type: knowledge_rag
     llm:
       provider: oci_genai
-      model: meta.llama-3.1-70b-instruct
+      model: meta.llama-3.3-70b-instruct
       region: ap-osaka-1
       temperature: 0.1
       max_tokens: 1024
@@ -45,7 +45,7 @@ agents:
     type: data_analysis
     llm:
       provider: oci_genai
-      model: meta.llama-3.1-70b-instruct
+      model: meta.llama-3.3-70b-instruct
       region: ap-osaka-1
       temperature: 0.1
       max_tokens: 2048
@@ -85,7 +85,7 @@ agents:
     type: workflow_automation
     llm:
       provider: oci_genai
-      model: meta.llama-3.1-70b-instruct
+      model: meta.llama-3.3-70b-instruct
       region: ap-osaka-1
       temperature: 0.2
       max_tokens: 2048
