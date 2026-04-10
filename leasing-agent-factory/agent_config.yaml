@@ -1,0 +1,137 @@
+# Oracle Private Agent Factory - Leasing Industry Agent Configurations
+# Region: ap-singapore-1
+# LLM: OCI GenAI Meta Llama 3.1 70B
+# DB: Oracle Autonomous Database 26ai
+
+llm_config:
+  provider: oci_genai
+  model_id: meta.llama-3.1-70b-instruct
+  endpoint: https://inference.generativeai.ap-singapore-1.oci.oraclecloud.com
+  max_tokens: 2048
+  temperature: 0.1
+
+embedding_config:
+  provider: oci_genai
+  model_id: cohere.embed-multilingual-v3
+  endpoint: https://inference.generativeai.ap-singapore-1.oci.oraclecloud.com
+
+database_config:
+  connection_name: LEASING_DB
+  service_name: leasingagentdb_high
+  username: LEASING_AGENT_USER
+  wallet_path: ./wallet/leasing_db_wallet.zip
+
+agents:
+
+  - name: lease-contract-agent
+    display_name: Lease Contract Intelligence Agent
+    description: >
+      AI agent for querying and analyzing lease contracts using natural language.
+      Supports RAG over lease policy documents and SQL queries on contract data.
+      Responds in Bahasa Indonesia when asked.
+    icon: document
+    tools:
+      - type: sql
+        description: Query lease_contracts table for contract details, status, and financials
+        tables:
+          - lease_contracts
+      - type: rag
+        description: Retrieve relevant lease policy documents for contract interpretation
+        knowledge_base:
+          source_table: lease_policy_docs
+          content_column: content
+          title_column: doc_title
+          filter_column: category
+          filter_values: [CONTRACT]
+          embedding_model: cohere.embed-multilingual-v3
+          chunk_size: 500
+          chunk_overlap: 50
+    system_prompt: |
+      Anda adalah agen AI untuk Divisi Leasing yang ahli dalam menganalisis kontrak sewa.
+      Gunakan tabel lease_contracts untuk menjawab pertanyaan tentang status kontrak,
+      nilai kontrak, dan tanggal jatuh tempo.
+      Gunakan dokumen kebijakan untuk menjawab pertanyaan tentang aturan dan prosedur.
+      Selalu sertakan nilai dalam format IDR (Rupiah).
+      Jawab dalam Bahasa Indonesia kecuali diminta dalam bahasa lain.
+    sample_prompts:
+      - "Tampilkan semua kontrak aktif beserta nilai bulanannya"
+      - "Kontrak mana yang akan berakhir dalam 6 bulan ke depan?"
+      - "Apa kebijakan penghentian kontrak lebih awal?"
+      - "Berapa total nilai kontrak untuk sektor konstruksi?"
+
+  - name: credit-risk-agent
+    display_name: Credit & Risk Analysis Agent
+    description: >
+      AI agent for credit risk analysis and portfolio monitoring.
+      Queries customer credit profiles, risk ratings, and exposure analytics.
+      Supports risk-based decision support for account managers.
+    icon: chart
+    tools:
+      - type: sql
+        description: Query credit profiles and risk metrics for portfolio analysis
+        tables:
+          - customer_credit_profile
+          - lease_contracts
+          - v_risk_summary
+      - type: rag
+        description: Retrieve credit risk rating criteria and policies
+        knowledge_base:
+          source_table: lease_policy_docs
+          content_column: content
+          title_column: doc_title
+          filter_column: category
+          filter_values: [CREDIT]
+          embedding_model: cohere.embed-multilingual-v3
+          chunk_size: 500
+          chunk_overlap: 50
+    system_prompt: |
+      Anda adalah agen AI untuk Divisi Manajemen Risiko Kredit.
+      Gunakan tabel customer_credit_profile untuk menganalisis profil risiko nasabah.
+      Tampilkan credit score, debt-to-income ratio, dan risk rating dengan jelas.
+      Berikan rekomendasi berdasarkan kebijakan risiko perusahaan.
+      Tandai nasabah CRITICAL dan HIGH dengan peringatan yang jelas.
+      Gunakan format tabel untuk perbandingan antar nasabah.
+    sample_prompts:
+      - "Tampilkan customer dengan risk rating CRITICAL"
+      - "Berapa total exposure untuk nasabah dengan rating HIGH dan CRITICAL?"
+      - "Siapa nasabah dengan credit score tertinggi dan terendah?"
+      - "Apa kriteria untuk risk rating MEDIUM?"
+
+  - name: collections-agent
+    display_name: Collections Automation Agent
+    description: >
+      AI agent for collections workflow management and overdue account monitoring.
+      Provides actionable insights on overdue accounts, escalation status, and
+      recommended next steps based on collections policy.
+    icon: alert
+    tools:
+      - type: sql
+        description: Query overdue accounts, collection stages, and action items
+        tables:
+          - collections_accounts
+          - lease_contracts
+          - customer_credit_profile
+          - v_collections_summary
+      - type: rag
+        description: Retrieve collections escalation policies and procedures
+        knowledge_base:
+          source_table: lease_policy_docs
+          content_column: content
+          title_column: doc_title
+          filter_column: category
+          filter_values: [COLLECTIONS]
+          embedding_model: cohere.embed-multilingual-v3
+          chunk_size: 500
+          chunk_overlap: 50
+    system_prompt: |
+      Anda adalah agen AI untuk Tim Penagihan (Collections).
+      Gunakan tabel collections_accounts untuk memantau akun yang menunggak.
+      Tampilkan informasi DPD (Days Past Due), jumlah tunggakan, dan tindakan berikutnya.
+      Rekomendasikan eskalasi berdasarkan kebijakan koleksi perusahaan.
+      Prioritaskan akun dengan DPD tinggi dan jumlah tunggakan besar.
+      Sertakan informasi kontak untuk memudahkan tindak lanjut.
+    sample_prompts:
+      - "Tampilkan akun overdue lebih dari 30 hari"
+      - "Akun mana yang perlu dieskalasi ke legal?"
+      - "Berapa total tunggakan untuk semua akun aktif?"
+      - "Tampilkan next actions yang jatuh tempo minggu ini"
