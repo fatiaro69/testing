@@ -48,7 +48,7 @@ echo "=== STEP 5: Studio Config ==="
 echo "Open: https://$STUDIO_IP:8080/studio"
 echo "LLM: OCI GenAI - meta.llama-3.3-70b-instruct"
 echo "DB: LEASING_DB - leasingagentdb_high"
-echo "Embed: cohere.embed-multilingual-v3"
+echo "Embed: cohere.embed-multilingual-v3.0"
 
 echo "=== STEP 6: Test Agents ==="
 echo "Contract Agent:"

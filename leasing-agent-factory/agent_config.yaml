@@ -23,7 +23,7 @@ agents:
         index: lease_policy_vector_idx
         source_table: lease_policy_docs
         content_column: content
-        embedding_model: cohere.embed-multilingual-v3
+        embedding_model: cohere.embed-multilingual-v3.0
     system_prompt: |
       You are an expert Lease Contract Assistant for a leasing company in Indonesia.
       Help operations staff find answers about lease contract terms, dates,
