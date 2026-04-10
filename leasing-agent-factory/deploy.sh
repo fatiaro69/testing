@@ -2,9 +2,9 @@
 # Oracle Private Agent Factory - Leasing Deployment
 # Run in Git Bash on Windows 10
 
-OCI_TENANCY_OCID="REPLACE_WITH_YOUR_TENANCY_OCID"
-OCI_REGION="ap-singapore-1"
-COMPARTMENT_OCID="REPLACE_WITH_YOUR_COMPARTMENT_OCID"
+OCI_TENANCY_OCID="ocid1.tenancy.oc1..aaaaaaaaghysqhr3phrt6atz57epiwl4h32vb6oavg2ayblwnohjsxeclzwq"
+OCI_REGION="ap-osaka-1"
+COMPARTMENT_OCID="ocid1.compartment.oc1..aaaaaaaabd5xaedyzvbirfqewuo3xwmeevbbsyjbgjm2ji7bcmn3hvnrkngq"
 DB_DISPLAY_NAME="LeasingAgentDB"
 DB_ADMIN_PASSWORD="WelcomeLeasing#2024"
 AGENT_USER_PASSWORD="AgentUser#2024"
