@@ -1,0 +1,9 @@
+wallet/
+*.zip
+.env
+secrets.yaml
+*.pem
+*.key
+Thumbs.db
+Desktop.ini
+~/.oci/

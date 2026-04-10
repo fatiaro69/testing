@@ -1,0 +1,165 @@
+# Oracle Private Agent Factory - Leasing Industry
+# Agent Configuration - Open Agent Specification Format
+
+agents:
+
+  # -----------------------------------------
+  # AGENT 1: Lease Contract Intelligence
+  # -----------------------------------------
+  - id: lease-contract-agent
+    name: "Lease Contract Intelligence Agent"
+    description: >
+      Answers natural language questions about lease contracts,
+      terms, early termination policies, renewal options, and
+      contract status for the leasing operations team.
+    type: knowledge_rag
+    llm:
+      provider: oci_genai
+      model: meta.llama-3.1-70b-instruct
+      region: ap-singapore-1
+      temperature: 0.1
+      max_tokens: 1024
+    data_sources:
+      - type: oracle_database
+        connection: LEASING_DB
+        tables:
+          - lease_contracts
+          - lease_policy_docs
+      - type: vector_store
+        index: lease_policy_vector_idx
+        source_table: lease_policy_docs
+        content_column: content
+        embedding_model: cohere.embed-multilingual-v3
+    system_prompt: |
+      You are an expert Lease Contract Assistant for a leasing company in Indonesia.
+      You help operations staff quickly find answers about:
+      - Lease contract terms, dates, and payment schedules
+      - Early termination fees and conditions
+      - Renewal options and eligibility
+      - Asset details and residual values
+      Always respond in professional Bahasa Indonesia or English based on the user language.
+      Base all answers strictly on contract data and company policy documents.
+      When referencing a contract, always include the Contract ID.
+    sample_questions:
+      - "Berapa denda early termination untuk kontrak LC-2024-002?"
+      - "Kontrak mana yang memiliki opsi renewal aktif?"
+      - "Apa kebijakan perusahaan untuk perpanjangan kontrak?"
+      - "What is the residual value for PT Tambang Sejahtera contract?"
+
+  # -----------------------------------------
+  # AGENT 2: Credit & Risk Analysis
+  # -----------------------------------------
+  - id: credit-risk-agent
+    name: "Credit & Risk Analysis Agent"
+    description: >
+      Analyzes customer credit profiles, flags high-risk accounts,
+      generates risk summaries and charts for the credit
+      and underwriting team.
+    type: data_analysis
+    llm:
+      provider: oci_genai
+      model: meta.llama-3.1-70b-instruct
+      region: ap-singapore-1
+      temperature: 0.1
+      max_tokens: 2048
+    data_sources:
+      - type: oracle_database
+        connection: LEASING_DB
+        tables:
+          - customer_credit_profile
+          - lease_contracts
+          - v_risk_summary
+        select_ai: true
+        select_ai_profile: CREDIT_ANALYST_PROFILE
+    tools:
+      - type: sql_executor
+        read_only: true
+      - type: chart_generator
+        supported_types: [bar, pie, line, scatter]
+      - type: pdf_report_generator
+    system_prompt: |
+      You are a Credit Risk Analyst AI for a leasing company in Indonesia.
+      Your role is to:
+      - Summarize credit risk exposure across the portfolio
+      - Flag CRITICAL and HIGH risk customers for immediate review
+      - Analyze trends in credit scores, DTI ratios, and payment history
+      - Generate visual charts and risk reports on demand
+      Always highlight accounts requiring urgent attention.
+      Format all financial figures in Indonesian Rupiah (IDR).
+      Be precise with numbers and always show the risk rating prominently.
+    sample_questions:
+      - "Tampilkan semua customer dengan risk rating CRITICAL atau HIGH"
+      - "Berapa total exposure untuk customer dengan credit score di bawah 600?"
+      - "Buat chart distribusi risk rating seluruh portfolio"
+      - "Which customers are due for credit review this month?"
+
+  # -----------------------------------------
+  # AGENT 3: Collections Automation
+  # -----------------------------------------
+  - id: collections-agent
+    name: "Collections Automation Agent"
+    description: >
+      Monitors overdue accounts, recommends collection actions per
+      company policy, drafts WhatsApp and email communication
+      templates, and tracks escalation stages for the collections team.
+    type: workflow_automation
+    llm:
+      provider: oci_genai
+      model: meta.llama-3.1-70b-instruct
+      region: ap-singapore-1
+      temperature: 0.2
+      max_tokens: 2048
+    data_sources:
+      - type: oracle_database
+        connection: LEASING_DB
+        tables:
+          - collections_accounts
+          - lease_contracts
+          - lease_policy_docs
+          - v_collections_summary
+        select_ai: true
+    tools:
+      - type: sql_executor
+        read_only: true
+      - type: email_template_generator
+      - type: whatsapp_template_generator
+      - type: escalation_recommender
+    system_prompt: |
+      You are a Collections Automation Agent for a leasing company in Indonesia.
+      Your responsibilities:
+      - Monitor accounts by Days Past Due (DPD) and overdue amount
+      - Recommend next collection actions per company escalation policy
+      - Draft professional, firm but respectful communications in Bahasa Indonesia
+      - Prioritize high-value overdue accounts above IDR 50,000,000
+      - Never recommend legal escalation without confirming 60 or more DPD
+      Follow the 4-stage escalation policy strictly:
+      Stage 1 Reminder, Stage 2 Soft Collection, Stage 3 Legal, Stage 4 Write-Off.
+      Format all communications professionally with company letterhead standard.
+    sample_questions:
+      - "Tampilkan semua akun yang overdue lebih dari 30 hari"
+      - "Buatkan draft WhatsApp reminder untuk COL-001"
+      - "Rekomendasikan tindakan untuk akun dengan DPD tertinggi"
+      - "Berapa total piutang tertunggak seluruh portfolio collections?"
+
+# -----------------------------------------
+# SHARED DATABASE CONNECTION
+# -----------------------------------------
+connections:
+  - id: LEASING_DB
+    type: oracle_autonomous_database
+    wallet_location: /opt/agent-factory/wallet/leasing_db_wallet.zip
+    service_name: leasingagentdb_high
+    username: LEASING_AGENT_USER
+    password_secret: oci_vault_secret_id_here
+
+# -----------------------------------------
+# GUARDRAILS
+# -----------------------------------------
+guardrails:
+  - block_pii_output: true
+  - max_sql_rows_returned: 500
+  - require_human_approval_for:
+      - legal_escalation
+      - write_off_recommendation
+  - audit_log: true
+  - allowed_operations: [SELECT]
