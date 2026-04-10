@@ -20,7 +20,8 @@ oci db autonomous-database create \
   --db-name "leasingagentdb" \
   --admin-password "$DB_ADMIN_PASSWORD" \
   --db-workload "OLTP" \
-  --cpu-core-count 2 \
+  --compute-model ECPU \
+  --compute-count 4 \
   --data-storage-size-in-tbs 1 \
   --is-auto-scaling-enabled true \
   --region "$OCI_REGION" \
